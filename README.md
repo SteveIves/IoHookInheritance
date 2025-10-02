@@ -10,32 +10,32 @@ This repository demonstrates how to implement and use multiple I/O Hook classes 
 
 ### Core Classes
 
-1. **BaseIOHook.dbl** - Abstract base class
+1. **BaseIOHook.dbl** - Abstract base class (246 lines)
    - Provides common functionality for all I/O hooks
    - Defines virtual methods that can be overridden by derived classes
    - Implements the basic IOHooks interface with enable/disable capability
    - Serves as the foundation for inheritance
 
-2. **LoggingIOHook.dbl** - Logging functionality
+2. **LoggingIOHook.dbl** - Logging functionality (164 lines)
    - Inherits from BaseIOHook
    - Logs all I/O operations to a file
    - Captures open, close, read, write, update, and delete operations
    - Includes timestamps for each operation
 
-3. **ValidationIOHook.dbl** - Data validation
+3. **ValidationIOHook.dbl** - Data validation (159 lines)
    - Inherits from BaseIOHook
    - Validates data before write and update operations
    - Checks for minimum/maximum record lengths
    - Detects blank records
    - Tracks validation errors
 
-4. **StatisticsIOHook.dbl** - Operation statistics
+4. **StatisticsIOHook.dbl** - Operation statistics (155 lines)
    - Inherits from BaseIOHook
    - Tracks counts of all I/O operations
    - Provides methods to display and reset statistics
    - Useful for performance monitoring
 
-5. **CombinedIOHook.dbl** - Combined functionality
+5. **CombinedIOHook.dbl** - Combined functionality (252 lines)
    - Inherits from BaseIOHook
    - Demonstrates how to combine multiple features in one class
    - Includes logging, validation, and statistics in a single hook
@@ -43,8 +43,10 @@ This repository demonstrates how to implement and use multiple I/O Hook classes 
 
 ### Supporting Files
 
-- **Customer.def** - Sample record structure for demonstration
-- **MainProgram.dbl** - Main program demonstrating concurrent hook usage
+- **Customer.def** - Sample record structure for demonstration (18 lines)
+- **MainProgram.dbl** - Main program demonstrating concurrent hook usage (248 lines)
+- **build.sh** - Linux/Mac build script
+- **build.bat** - Windows build script
 
 ## Key Concepts Demonstrated
 
@@ -215,6 +217,15 @@ This is example code provided for educational purposes.
 ## Author
 
 Steve Ives
+
+## Documentation
+
+This repository includes comprehensive documentation:
+
+- **[QUICKSTART.md](QUICKSTART.md)** - Get started quickly with a 5-minute guide
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture and design documentation
+- **[EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md)** - Expected output from running the program
+- **README.md** (this file) - Overview and general information
 
 ## Additional Resources
 
