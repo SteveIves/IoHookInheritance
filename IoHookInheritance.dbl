@@ -1,0 +1,66 @@
+;******************************************************************************
+;
+; Title:       IoHookInheritance.dbl
+; Type:        Program
+; Description: An example of using inheritance with I/O hook classes.
+; Date:        2nd October 2025
+; Author:      Steve Ives, Synergex Professional Services Group
+;
+;******************************************************************************
+;
+; Copyright (c) 2025, Synergex International, Inc.
+; All rights reserved.
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions are met:
+;
+; * Redistributions of source code must retain the above copyright notice,
+;   this list of conditions and the following disclaimer.
+;
+; * Redistributions in binary form must reproduce the above copyright notice,
+;   this list of conditions and the following disclaimer in the documentation
+;   and/or other materials provided with the distribution.
+;
+; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+; LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+; CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+; SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+; CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+; POSSIBILITY OF SUCH DAMAGE.
+;
+;******************************************************************************
+
+import SynPSG.Demos.IoHooks
+
+main IoHooksDemo
+
+    record
+        channel, i4
+        syntxtrec, a218
+    endrecord
+
+proc
+    flags(7004020,1)
+
+    open(channel=0,i:i,"DBLDIR:syntxt.ism")
+    new HookClass2(channel)
+
+    find(channel,,^FIRST)
+
+    repeat
+    begin
+        reads(channel,syntxtrec,eof)
+    end
+eof,
+
+    close channel
+
+    Console.WriteLine("Press ENTER to exit: ")
+    Console.ReadLine()
+
+endmain

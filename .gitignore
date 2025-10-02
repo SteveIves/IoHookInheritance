@@ -1,0 +1,28 @@
+
+# Ignore specific file extensions anywhere in the tree
+
+*.dbp
+*.dbr
+*.g.resources
+*.in
+*.log
+*.nupkg
+*.pdb
+*.resources
+*.suo
+*.user
+
+# Ignore specific folders anywhere in the tree
+
+**/.intellisense
+**/.vs
+**/bin
+**/obj
+
+# Ignore specific folders
+
+/packages
+
+# Ignore specific files
+
+/UpgradeLog.htm

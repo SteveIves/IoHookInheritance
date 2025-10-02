@@ -1,0 +1,189 @@
+;******************************************************************************
+;
+; Title:       HookClass1.dbl
+; Type:        Class
+; Description: An example of an I/O hook class.
+; Date:        2nd October 2025
+; Author:      Steve Ives, Synergex Professional Services Group
+;
+;******************************************************************************
+;
+; Copyright (c) 2025, Synergex International, Inc.
+; All rights reserved.
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions are met:
+;
+; * Redistributions of source code must retain the above copyright notice,
+;   this list of conditions and the following disclaimer.
+;
+; * Redistributions in binary form must reproduce the above copyright notice,
+;   this list of conditions and the following disclaimer in the documentation
+;   and/or other materials provided with the distribution.
+;
+; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+; IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+; LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+; CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+; SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+; CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+; POSSIBILITY OF SUCH DAMAGE.
+;
+;******************************************************************************
+
+import Synergex.SynergyDE.IOExtensions
+
+namespace SynPSG.Demos.IoHooks
+
+    public class HookClass1 extends IOHooks
+
+        public method HookClass1
+            required in aChannel, n
+            parent(aChannel)
+        proc
+            Console.WriteLine("HookClass1: constructor")
+        endmethod
+
+        public override method find_pre_operation_hook, void
+            optional in mismatch aKeyVal, n
+            optional in aInRFA, a
+            optional in aKeyNum, n
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: find_pre_operation_hook")
+        endmethod
+
+        public override method find_post_operation_hook, void
+            optional in mismatch aKeyVal, n
+            optional in aOutRFA, a
+            optional in aKeyNum, n
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: find_post_operation_hook")
+        endmethod
+
+        public override method read_pre_operation_hook, void
+            optional in mismatch aKeyVal, n
+            optional in aInRFA, a
+            optional in aKeyNum, n
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: read_pre_operation_hook")
+        endmethod
+
+        public override method read_post_operation_hook, void
+            required inout aBuffer, a
+            optional in mismatch aKeyVal, n
+            optional in aOutRFA, a
+            optional in aKeyNum, n
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: read_post_operation_hook")
+        endmethod
+
+        public override method reads_pre_operation_hook, void
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: reads_pre_operation_hook")
+        endmethod
+
+        public override method reads_post_operation_hook, void
+            required inout aBuffer, a
+            optional in aOutRFA, a
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: reads_post_operation_hook")
+        endmethod
+
+        public override method write_pre_operation_hook, void
+            required inout aBuffer, a
+            optional in aRecNum, n
+            optional in aInRFA, a
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: write_pre_operation_hook")
+        endmethod
+
+        public override method write_post_operation_hook, void
+            required inout aBuffer, a
+            optional in aRecNum, n
+            optional in aOutRFA, a
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: write_post_operation_hook")
+        endmethod
+
+        public override method writes_pre_operation_hook, void
+            required inout aBuffer, a
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: writes_pre_operation_hook")
+        endmethod
+
+        public override method writes_post_operation_hook, void
+            required inout aBuffer, a
+            optional in aStoredRFA, a
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: writes_post_operation_hook")
+        endmethod
+
+        public override method store_pre_operation_hook, void
+            required inout aBuffer, a
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: store_pre_operation_hook")
+        endmethod
+
+        public override method store_post_operation_hook, void
+            required inout aBuffer, a
+            optional in aStoredRFA, a
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: store_post_operation_hook")
+        endmethod
+
+        public override method delete_pre_operation_hook, void
+        proc
+            Console.WriteLine("HookClass1: delete_pre_operation_hook")
+        endmethod
+
+        public override method delete_post_operation_hook, void
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: delete_post_operation_hook")
+        endmethod
+
+        public override method unlock_pre_operation_hook, void
+            optional in aRFA, a
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: unlock_pre_operation_hook")
+        endmethod
+
+        public override method unlock_post_operation_hook, void
+            required in aIoFlags, IOFlags
+            required inout aErrorNum, int
+        proc
+            Console.WriteLine("HookClass1: unlock_post_operation_hook")
+        endmethod
+
+        public override method close_pre_operation_hook, void
+            required in aIoFlags, IOFlags
+        proc
+            Console.WriteLine("HookClass1: close_pre_operation_hook")
+        endmethod
+
+    endclass
+
+endnamespace
