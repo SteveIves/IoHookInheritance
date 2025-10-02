@@ -1,0 +1,155 @@
+;;*****************************************************************************
+;;
+;; Title:       StatisticsIOHook.dbl
+;;
+;; Description: I/O Hook class that tracks statistics about I/O operations.
+;;
+;;*****************************************************************************
+;; This class demonstrates inheritance by extending BaseIOHook and adding
+;; statistical tracking functionality.
+;;*****************************************************************************
+
+import Synergex.SynergyDE.Select
+
+namespace IoHookInheritance
+
+    public class StatisticsIOHook extends BaseIOHook
+    
+        private mOpenCount, int
+        private mCloseCount, int
+        private mReadCount, int
+        private mWriteCount, int
+        private mUpdateCount, int
+        private mDeleteCount, int
+        
+        ;;-----------------------------------------------------------------------
+        ;; Constructor
+        
+        public method StatisticsIOHook
+            channelName, string
+        proc
+            parent(channelName)
+            this.ResetStatistics()
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Properties
+        
+        public property OpenCount, int
+            method get
+            proc
+                mreturn mOpenCount
+            endmethod
+        endproperty
+        
+        public property CloseCount, int
+            method get
+            proc
+                mreturn mCloseCount
+            endmethod
+        endproperty
+        
+        public property ReadCount, int
+            method get
+            proc
+                mreturn mReadCount
+            endmethod
+        endproperty
+        
+        public property WriteCount, int
+            method get
+            proc
+                mreturn mWriteCount
+            endmethod
+        endproperty
+        
+        public property UpdateCount, int
+            method get
+            proc
+                mreturn mUpdateCount
+            endmethod
+        endproperty
+        
+        public property DeleteCount, int
+            method get
+            proc
+                mreturn mDeleteCount
+            endmethod
+        endproperty
+        
+        ;;-----------------------------------------------------------------------
+        ;; Override virtual methods from BaseIOHook
+        
+        protected override method OnPostOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            mOpenCount += 1
+        endmethod
+        
+        protected override method OnPostClose, void
+            channelName, string
+        proc
+            mCloseCount += 1
+        endmethod
+        
+        protected override method OnPostRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            mReadCount += 1
+        endmethod
+        
+        protected override method OnPostWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            mWriteCount += 1
+        endmethod
+        
+        protected override method OnPostUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            mUpdateCount += 1
+        endmethod
+        
+        protected override method OnPostDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            mDeleteCount += 1
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Public methods
+        
+        public method ResetStatistics, void
+        proc
+            mOpenCount = 0
+            mCloseCount = 0
+            mReadCount = 0
+            mWriteCount = 0
+            mUpdateCount = 0
+            mDeleteCount = 0
+        endmethod
+        
+        public method PrintStatistics, void
+        proc
+            xcall console("")
+            xcall console("=== I/O Statistics for Channel: " + mChannelName + " ===")
+            xcall console("  Opens:   " + %string(mOpenCount))
+            xcall console("  Closes:  " + %string(mCloseCount))
+            xcall console("  Reads:   " + %string(mReadCount))
+            xcall console("  Writes:  " + %string(mWriteCount))
+            xcall console("  Updates: " + %string(mUpdateCount))
+            xcall console("  Deletes: " + %string(mDeleteCount))
+            xcall console("===========================================")
+            xcall console("")
+        endmethod
+        
+    endclass
+
+endnamespace

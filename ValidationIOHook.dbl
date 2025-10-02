@@ -1,0 +1,159 @@
+;;*****************************************************************************
+;;
+;; Title:       ValidationIOHook.dbl
+;;
+;; Description: I/O Hook class that validates data before write/update operations.
+;;
+;;*****************************************************************************
+;; This class demonstrates inheritance by extending BaseIOHook and adding
+;; data validation functionality.
+;;*****************************************************************************
+
+import Synergex.SynergyDE.Select
+
+namespace IoHookInheritance
+
+    public class ValidationIOHook extends BaseIOHook
+    
+        private mMinRecordLength, int
+        private mMaxRecordLength, int
+        private mValidationEnabled, boolean
+        private mValidationErrors, int
+        
+        ;;-----------------------------------------------------------------------
+        ;; Constructor
+        
+        public method ValidationIOHook
+            channelName, string
+            minLength, int
+            maxLength, int
+        proc
+            parent(channelName)
+            mMinRecordLength = minLength
+            mMaxRecordLength = maxLength
+            mValidationEnabled = true
+            mValidationErrors = 0
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Properties
+        
+        public property ValidationEnabled, boolean
+            method get
+            proc
+                mreturn mValidationEnabled
+            endmethod
+            method set
+            proc
+                mValidationEnabled = value
+            endmethod
+        endproperty
+        
+        public property ValidationErrors, int
+            method get
+            proc
+                mreturn mValidationErrors
+            endmethod
+        endproperty
+        
+        public property MinRecordLength, int
+            method get
+            proc
+                mreturn mMinRecordLength
+            endmethod
+            method set
+            proc
+                mMinRecordLength = value
+            endmethod
+        endproperty
+        
+        public property MaxRecordLength, int
+            method get
+            proc
+                mreturn mMaxRecordLength
+            endmethod
+            method set
+            proc
+                mMaxRecordLength = value
+            endmethod
+        endproperty
+        
+        ;;-----------------------------------------------------------------------
+        ;; Private validation method
+        
+        private method ValidateRecord, boolean
+            recordArea, a
+        proc
+            data recordLength, int
+            data isValid, boolean
+            
+            isValid = true
+            recordLength = ^size(recordArea)
+            
+            ;; Check minimum length
+            if (recordLength < mMinRecordLength)
+            begin
+                isValid = false
+                mValidationErrors += 1
+                xcall console("VALIDATION ERROR: Record too short (minimum " + %string(mMinRecordLength) + " bytes)")
+            end
+            
+            ;; Check maximum length
+            if (recordLength > mMaxRecordLength)
+            begin
+                isValid = false
+                mValidationErrors += 1
+                xcall console("VALIDATION ERROR: Record too long (maximum " + %string(mMaxRecordLength) + " bytes)")
+            end
+            
+            ;; Check for all blank record
+            if (%atrim(recordArea) == "")
+            begin
+                isValid = false
+                mValidationErrors += 1
+                xcall console("VALIDATION ERROR: Record is blank")
+            end
+            
+            mreturn isValid
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Override virtual methods from BaseIOHook
+        
+        protected override method OnPreWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mValidationEnabled)
+            begin
+                if (!this.ValidateRecord(recordArea))
+                begin
+                    xcall console("VALIDATION: PreWrite validation failed for channel " + channelName)
+                end
+            end
+        endmethod
+        
+        protected override method OnPreUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mValidationEnabled)
+            begin
+                if (!this.ValidateRecord(recordArea))
+                begin
+                    xcall console("VALIDATION: PreUpdate validation failed for channel " + channelName)
+                end
+            end
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Public method to reset error counter
+        
+        public method ResetErrorCount, void
+        proc
+            mValidationErrors = 0
+        endmethod
+        
+    endclass
+
+endnamespace

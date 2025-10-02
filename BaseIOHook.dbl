@@ -1,0 +1,246 @@
+;;*****************************************************************************
+;;
+;; Title:       BaseIOHook.dbl
+;;
+;; Description: Base I/O Hook class that provides common functionality for
+;;              derived I/O Hook classes.
+;;
+;;*****************************************************************************
+;; This class serves as the foundation for all I/O Hook implementations.
+;; Derived classes can override specific methods to add custom behavior
+;; while inheriting common functionality.
+;;*****************************************************************************
+
+import Synergex.SynergyDE.Select
+
+namespace IoHookInheritance
+
+    public abstract class BaseIOHook extends IOHooks
+    
+        protected mChannelName, string
+        protected mEnabled, boolean
+        
+        ;;-----------------------------------------------------------------------
+        ;; Constructor
+        
+        public method BaseIOHook
+            channelName, string
+        proc
+            mChannelName = channelName
+            mEnabled = true
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Properties
+        
+        public property ChannelName, string
+            method get
+            proc
+                mreturn mChannelName
+            endmethod
+        endproperty
+        
+        public property Enabled, boolean
+            method get
+            proc
+                mreturn mEnabled
+            endmethod
+            method set
+            proc
+                mEnabled = value
+            endmethod
+        endproperty
+        
+        ;;-----------------------------------------------------------------------
+        ;; Override IOHooks methods - these can be further overridden by derived classes
+        
+        public override method PreOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            if (mEnabled)
+                this.OnPreOpen(channelName, openMode, fileName)
+        endmethod
+        
+        public override method PostOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            if (mEnabled)
+                this.OnPostOpen(channelName, openMode, fileName)
+        endmethod
+        
+        public override method PreRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            if (mEnabled)
+                this.OnPreRead(channelName, recordArea, direction)
+        endmethod
+        
+        public override method PostRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            if (mEnabled)
+                this.OnPostRead(channelName, recordArea, direction)
+        endmethod
+        
+        public override method PreWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mEnabled)
+                this.OnPreWrite(channelName, recordArea)
+        endmethod
+        
+        public override method PostWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mEnabled)
+                this.OnPostWrite(channelName, recordArea)
+        endmethod
+        
+        public override method PreUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mEnabled)
+                this.OnPreUpdate(channelName, recordArea)
+        endmethod
+        
+        public override method PostUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mEnabled)
+                this.OnPostUpdate(channelName, recordArea)
+        endmethod
+        
+        public override method PreDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mEnabled)
+                this.OnPreDelete(channelName, recordArea)
+        endmethod
+        
+        public override method PostDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mEnabled)
+                this.OnPostDelete(channelName, recordArea)
+        endmethod
+        
+        public override method PreClose, void
+            channelName, string
+        proc
+            if (mEnabled)
+                this.OnPreClose(channelName)
+        endmethod
+        
+        public override method PostClose, void
+            channelName, string
+        proc
+            if (mEnabled)
+                this.OnPostClose(channelName)
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Protected virtual methods for derived classes to override
+        
+        protected virtual method OnPreOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPostOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPreRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPostRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPreWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPostWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPreUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPostUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPreDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPostDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPreClose, void
+            channelName, string
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+        protected virtual method OnPostClose, void
+            channelName, string
+        proc
+            ;; Default implementation does nothing
+        endmethod
+        
+    endclass
+
+endnamespace

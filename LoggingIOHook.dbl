@@ -1,0 +1,164 @@
+;;*****************************************************************************
+;;
+;; Title:       LoggingIOHook.dbl
+;;
+;; Description: I/O Hook class that logs all I/O operations to a log file.
+;;
+;;*****************************************************************************
+;; This class demonstrates inheritance by extending BaseIOHook and adding
+;; logging functionality to all I/O operations.
+;;*****************************************************************************
+
+import Synergex.SynergyDE.Select
+
+namespace IoHookInheritance
+
+    public class LoggingIOHook extends BaseIOHook
+    
+        private mLogChannel, int
+        private mLogFileName, string
+        private mLogOperations, boolean
+        
+        ;;-----------------------------------------------------------------------
+        ;; Constructor
+        
+        public method LoggingIOHook
+            channelName, string
+            logFileName, string
+        proc
+            parent(channelName)
+            mLogFileName = logFileName
+            mLogChannel = 0
+            mLogOperations = true
+            
+            ;; Open the log file
+            this.OpenLogFile()
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Destructor
+        
+        protected override method Finalize, void
+        proc
+            this.CloseLogFile()
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Private methods
+        
+        private method OpenLogFile, void
+        proc
+            try
+            begin
+                open(mLogChannel = 0, O, mLogFileName)
+            end
+            catch (e, @Exception)
+            begin
+                xcall flags(7004000, 1)  ;; Turn off error handling
+                open(mLogChannel = 0, O:S, mLogFileName)
+                xcall flags(7004000, 0)  ;; Turn error handling back on
+            end
+            endtry
+        endmethod
+        
+        private method CloseLogFile, void
+        proc
+            if (mLogChannel && %chopen(mLogChannel))
+            begin
+                close mLogChannel
+                mLogChannel = 0
+            end
+        endmethod
+        
+        private method WriteLog, void
+            message, string
+        proc
+            if (mLogChannel && %chopen(mLogChannel))
+            begin
+                data timestamp, a20
+                xcall date_time(timestamp)
+                writes(mLogChannel, "[" + timestamp + "] " + message)
+            end
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Override virtual methods from BaseIOHook
+        
+        protected override method OnPostOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            if (mLogOperations)
+            begin
+                this.WriteLog("OPEN: Channel=" + channelName + ", Mode=" + %string(openMode) + ", File=" + fileName)
+            end
+        endmethod
+        
+        protected override method OnPostRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            if (mLogOperations)
+            begin
+                this.WriteLog("READ: Channel=" + channelName + ", Direction=" + %string(direction) + ", Record=" + %atrim(recordArea))
+            end
+        endmethod
+        
+        protected override method OnPreWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mLogOperations)
+            begin
+                this.WriteLog("WRITE: Channel=" + channelName + ", Record=" + %atrim(recordArea))
+            end
+        endmethod
+        
+        protected override method OnPreUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mLogOperations)
+            begin
+                this.WriteLog("UPDATE: Channel=" + channelName + ", Record=" + %atrim(recordArea))
+            end
+        endmethod
+        
+        protected override method OnPreDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            if (mLogOperations)
+            begin
+                this.WriteLog("DELETE: Channel=" + channelName + ", Record=" + %atrim(recordArea))
+            end
+        endmethod
+        
+        protected override method OnPostClose, void
+            channelName, string
+        proc
+            if (mLogOperations)
+            begin
+                this.WriteLog("CLOSE: Channel=" + channelName)
+            end
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Public properties
+        
+        public property LogOperations, boolean
+            method get
+            proc
+                mreturn mLogOperations
+            endmethod
+            method set
+            proc
+                mLogOperations = value
+            endmethod
+        endproperty
+        
+    endclass
+
+endnamespace

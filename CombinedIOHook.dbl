@@ -1,0 +1,252 @@
+;;*****************************************************************************
+;;
+;; Title:       CombinedIOHook.dbl
+;;
+;; Description: I/O Hook class that combines logging, validation, and statistics.
+;;
+;;*****************************************************************************
+;; This class demonstrates advanced inheritance by extending BaseIOHook and
+;; combining functionality from multiple specialized hooks.
+;;*****************************************************************************
+
+import Synergex.SynergyDE.Select
+
+namespace IoHookInheritance
+
+    public class CombinedIOHook extends BaseIOHook
+    
+        private mLogChannel, int
+        private mLogFileName, string
+        private mMinRecordLength, int
+        private mMaxRecordLength, int
+        private mValidationErrors, int
+        private mReadCount, int
+        private mWriteCount, int
+        private mUpdateCount, int
+        private mDeleteCount, int
+        
+        ;;-----------------------------------------------------------------------
+        ;; Constructor
+        
+        public method CombinedIOHook
+            channelName, string
+            logFileName, string
+            minLength, int
+            maxLength, int
+        proc
+            parent(channelName)
+            mLogFileName = logFileName
+            mLogChannel = 0
+            mMinRecordLength = minLength
+            mMaxRecordLength = maxLength
+            mValidationErrors = 0
+            mReadCount = 0
+            mWriteCount = 0
+            mUpdateCount = 0
+            mDeleteCount = 0
+            
+            this.OpenLogFile()
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Destructor
+        
+        protected override method Finalize, void
+        proc
+            this.CloseLogFile()
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Properties
+        
+        public property ValidationErrors, int
+            method get
+            proc
+                mreturn mValidationErrors
+            endmethod
+        endproperty
+        
+        public property ReadCount, int
+            method get
+            proc
+                mreturn mReadCount
+            endmethod
+        endproperty
+        
+        public property WriteCount, int
+            method get
+            proc
+                mreturn mWriteCount
+            endmethod
+        endproperty
+        
+        public property UpdateCount, int
+            method get
+            proc
+                mreturn mUpdateCount
+            endmethod
+        endproperty
+        
+        public property DeleteCount, int
+            method get
+            proc
+                mreturn mDeleteCount
+            endmethod
+        endproperty
+        
+        ;;-----------------------------------------------------------------------
+        ;; Private methods for logging
+        
+        private method OpenLogFile, void
+        proc
+            try
+            begin
+                open(mLogChannel = 0, O, mLogFileName)
+            end
+            catch (e, @Exception)
+            begin
+                xcall flags(7004000, 1)
+                open(mLogChannel = 0, O:S, mLogFileName)
+                xcall flags(7004000, 0)
+            end
+            endtry
+        endmethod
+        
+        private method CloseLogFile, void
+        proc
+            if (mLogChannel && %chopen(mLogChannel))
+            begin
+                close mLogChannel
+                mLogChannel = 0
+            end
+        endmethod
+        
+        private method WriteLog, void
+            message, string
+        proc
+            if (mLogChannel && %chopen(mLogChannel))
+            begin
+                data timestamp, a20
+                xcall date_time(timestamp)
+                writes(mLogChannel, "[" + timestamp + "] " + message)
+            end
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Private methods for validation
+        
+        private method ValidateRecord, boolean
+            recordArea, a
+        proc
+            data recordLength, int
+            data isValid, boolean
+            
+            isValid = true
+            recordLength = ^size(recordArea)
+            
+            if (recordLength < mMinRecordLength || recordLength > mMaxRecordLength || %atrim(recordArea) == "")
+            begin
+                isValid = false
+                mValidationErrors += 1
+                this.WriteLog("VALIDATION ERROR: Invalid record")
+            end
+            
+            mreturn isValid
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Override virtual methods from BaseIOHook
+        
+        protected override method OnPostOpen, void
+            channelName, string
+            openMode, IOOpenMode
+            fileName, string
+        proc
+            this.WriteLog("OPEN: Channel=" + channelName + ", Mode=" + %string(openMode) + ", File=" + fileName)
+        endmethod
+        
+        protected override method OnPostRead, void
+            channelName, string
+            recordArea, a
+            direction, IOReadDirection
+        proc
+            mReadCount += 1
+            this.WriteLog("READ: Channel=" + channelName + ", Count=" + %string(mReadCount))
+        endmethod
+        
+        protected override method OnPreWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            if (this.ValidateRecord(recordArea))
+            begin
+                this.WriteLog("WRITE: Channel=" + channelName + ", Record validated")
+            end
+            else
+            begin
+                this.WriteLog("WRITE FAILED: Channel=" + channelName + ", Validation error")
+            end
+        endmethod
+        
+        protected override method OnPostWrite, void
+            channelName, string
+            recordArea, a
+        proc
+            mWriteCount += 1
+        endmethod
+        
+        protected override method OnPreUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            if (this.ValidateRecord(recordArea))
+            begin
+                this.WriteLog("UPDATE: Channel=" + channelName + ", Record validated")
+            end
+            else
+            begin
+                this.WriteLog("UPDATE FAILED: Channel=" + channelName + ", Validation error")
+            end
+        endmethod
+        
+        protected override method OnPostUpdate, void
+            channelName, string
+            recordArea, a
+        proc
+            mUpdateCount += 1
+        endmethod
+        
+        protected override method OnPostDelete, void
+            channelName, string
+            recordArea, a
+        proc
+            mDeleteCount += 1
+            this.WriteLog("DELETE: Channel=" + channelName + ", Count=" + %string(mDeleteCount))
+        endmethod
+        
+        protected override method OnPostClose, void
+            channelName, string
+        proc
+            this.WriteLog("CLOSE: Channel=" + channelName)
+        endmethod
+        
+        ;;-----------------------------------------------------------------------
+        ;; Public methods
+        
+        public method PrintStatistics, void
+        proc
+            xcall console("")
+            xcall console("=== Combined I/O Hook Statistics ===")
+            xcall console("  Channel: " + mChannelName)
+            xcall console("  Reads:            " + %string(mReadCount))
+            xcall console("  Writes:           " + %string(mWriteCount))
+            xcall console("  Updates:          " + %string(mUpdateCount))
+            xcall console("  Deletes:          " + %string(mDeleteCount))
+            xcall console("  Validation Errors: " + %string(mValidationErrors))
+            xcall console("====================================")
+            xcall console("")
+        endmethod
+        
+    endclass
+
+endnamespace

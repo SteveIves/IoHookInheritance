@@ -1,0 +1,18 @@
+;;*****************************************************************************
+;;
+;; Title:       Customer.def
+;;
+;; Description: Sample customer record structure for demonstration purposes.
+;;
+;;*****************************************************************************
+
+structure Customer
+    ,a100
+    group Record    ,a
+        CustomerId  ,d10
+        Name        ,a30
+        Address     ,a40
+        Phone       ,a20
+    endgroup
+
+endstructure

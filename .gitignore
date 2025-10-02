@@ -1,0 +1,35 @@
+# Build artifacts
+*.dbo
+*.dbr
+*.obj
+*.exe
+
+# Log files
+*.txt
+logging.txt
+combined.txt
+
+# ISAM files
+*.ism
+*.is1
+*.is2
+*.is3
+*.is4
+*.is5
+*.is6
+*.is7
+*.is8
+
+# Synergy temporary files
+*.tmp
+*.bak
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.vs/
+.vscode/
+*.suo
+*.user

@@ -1,0 +1,248 @@
+;;*****************************************************************************
+;;
+;; Title:       MainProgram.dbl
+;;
+;; Description: Main program demonstrating concurrent use of multiple I/O Hooks
+;;              through inheritance.
+;;
+;;*****************************************************************************
+;; This program demonstrates how to use several I/O Hook classes concurrently.
+;; Each hook inherits from a common base class but provides specialized
+;; functionality:
+;;   - LoggingIOHook: Logs all I/O operations to a file
+;;   - ValidationIOHook: Validates data before write/update operations
+;;   - StatisticsIOHook: Tracks statistics about I/O operations
+;;   - CombinedIOHook: Combines all three functionalities
+;;*****************************************************************************
+
+import IoHookInheritance
+import Synergex.SynergyDE.Select
+
+main MainProgram
+
+record
+    customerChannel     ,int
+    customer            ,Customer
+    loggingHook         ,@LoggingIOHook
+    validationHook      ,@ValidationIOHook
+    statisticsHook      ,@StatisticsIOHook
+    combinedHook        ,@CombinedIOHook
+    counter             ,int
+
+proc
+    
+    xcall console("")
+    xcall console("=========================================================")
+    xcall console("I/O Hook Inheritance Demonstration")
+    xcall console("=========================================================")
+    xcall console("")
+    xcall console("This program demonstrates how to use multiple I/O Hook")
+    xcall console("classes concurrently through inheritance.")
+    xcall console("")
+    
+    ;; Initialize the hooks
+    loggingHook = new LoggingIOHook("CUSTOMER", "logging.txt")
+    validationHook = new ValidationIOHook("CUSTOMER", 50, 200)
+    statisticsHook = new StatisticsIOHook("CUSTOMER")
+    combinedHook = new CombinedIOHook("CUSTOMER_COMBINED", "combined.txt", 50, 200)
+    
+    xcall console("Step 1: Registering I/O Hooks...")
+    xcall console("")
+    
+    ;; Register all hooks for the CUSTOMER channel
+    IOHooks.AddHook("CUSTOMER", loggingHook)
+    IOHooks.AddHook("CUSTOMER", validationHook)
+    IOHooks.AddHook("CUSTOMER", statisticsHook)
+    
+    ;; Register the combined hook for a separate channel
+    IOHooks.AddHook("CUSTOMER_COMBINED", combinedHook)
+    
+    xcall console("  - LoggingIOHook registered")
+    xcall console("  - ValidationIOHook registered")
+    xcall console("  - StatisticsIOHook registered")
+    xcall console("  - CombinedIOHook registered (separate channel)")
+    xcall console("")
+    
+    ;;-------------------------------------------------------------------------
+    ;; Demonstrate basic operations with individual hooks
+    
+    xcall console("Step 2: Performing I/O operations with individual hooks...")
+    xcall console("")
+    
+    try
+    begin
+        ;; Create and open the test file
+        xcall flags(7004000, 1)  ;; Suppress file not found errors
+        open(customerChannel = 0, O:I, "customer.ism")
+        close customerChannel
+        xcall delet("customer.ism")
+        xcall flags(7004000, 0)
+    end
+    catch (e, @Exception)
+    begin
+        ;; File doesn't exist, that's fine
+    end
+    endtry
+    
+    ;; Create a new ISAM file
+    xcall isamc("customer.ism", 100, 1, "START=1,LENGTH=10")
+    
+    ;; Open the customer file - this will trigger all hooks
+    open(customerChannel = 0, O:I, "CUSTOMER:customer.ism")
+    
+    xcall console("  File opened (all hooks triggered)")
+    xcall console("")
+    
+    ;; Write some valid records
+    xcall console("  Writing valid records...")
+    for counter from 1 thru 5
+    begin
+        clear customer
+        customer.CustomerId = counter
+        customer.Name = "Customer " + %string(counter)
+        customer.Address = "Address " + %string(counter)
+        customer.Phone = "555-" + %string(counter, "XXXX")
+        
+        store(customerChannel, customer)
+    end
+    xcall console("    5 records written")
+    xcall console("")
+    
+    ;; Try to write an invalid record (too short)
+    xcall console("  Attempting to write invalid (blank) record...")
+    clear customer
+    store(customerChannel, customer)  ;; This will trigger validation warnings
+    xcall console("    Invalid record written (see validation warnings)")
+    xcall console("")
+    
+    ;; Read back the records
+    xcall console("  Reading records back...")
+    foreach customer in new Select(customerChannel, "CustomerId")
+    begin
+        ;; Each read triggers all the hooks
+    end
+    xcall console("    All records read")
+    xcall console("")
+    
+    ;; Update a record
+    xcall console("  Updating a record...")
+    find(customerChannel, 1, "CustomerId")
+    read(customerChannel, customer)
+    customer.Name = "Updated Customer 1"
+    write(customerChannel, customer)
+    xcall console("    Record updated")
+    xcall console("")
+    
+    ;; Delete a record
+    xcall console("  Deleting a record...")
+    find(customerChannel, 2, "CustomerId")
+    delete(customerChannel)
+    xcall console("    Record deleted")
+    xcall console("")
+    
+    ;; Close the file - triggers all hooks
+    close customerChannel
+    xcall console("  File closed (all hooks triggered)")
+    xcall console("")
+    
+    ;;-------------------------------------------------------------------------
+    ;; Display statistics
+    
+    xcall console("Step 3: Displaying hook statistics...")
+    xcall console("")
+    
+    statisticsHook.PrintStatistics()
+    
+    xcall console("Validation errors detected: " + %string(validationHook.ValidationErrors))
+    xcall console("")
+    
+    ;;-------------------------------------------------------------------------
+    ;; Demonstrate the combined hook
+    
+    xcall console("Step 4: Demonstrating combined hook...")
+    xcall console("")
+    
+    ;; Create another file for the combined hook
+    try
+    begin
+        xcall flags(7004000, 1)
+        open(customerChannel = 0, O:I, "customer2.ism")
+        close customerChannel
+        xcall delet("customer2.ism")
+        xcall flags(7004000, 0)
+    end
+    catch (e, @Exception)
+    begin
+        ;; File doesn't exist
+    end
+    endtry
+    
+    xcall isamc("customer2.ism", 100, 1, "START=1,LENGTH=10")
+    
+    open(customerChannel = 0, O:I, "CUSTOMER_COMBINED:customer2.ism")
+    
+    xcall console("  Writing records with combined hook...")
+    for counter from 1 thru 3
+    begin
+        clear customer
+        customer.CustomerId = counter
+        customer.Name = "Combined Customer " + %string(counter)
+        customer.Address = "Combined Address " + %string(counter)
+        customer.Phone = "555-" + %string(counter, "XXXX")
+        
+        store(customerChannel, customer)
+    end
+    
+    xcall console("  Reading records with combined hook...")
+    foreach customer in new Select(customerChannel, "CustomerId")
+    begin
+        ;; Read with combined hook
+    end
+    
+    close customerChannel
+    xcall console("  Combined hook operations complete")
+    xcall console("")
+    
+    combinedHook.PrintStatistics()
+    
+    ;;-------------------------------------------------------------------------
+    ;; Clean up
+    
+    xcall console("Step 5: Cleaning up...")
+    xcall console("")
+    
+    ;; Remove hooks
+    IOHooks.RemoveHook("CUSTOMER", loggingHook)
+    IOHooks.RemoveHook("CUSTOMER", validationHook)
+    IOHooks.RemoveHook("CUSTOMER", statisticsHook)
+    IOHooks.RemoveHook("CUSTOMER_COMBINED", combinedHook)
+    
+    xcall console("  All hooks removed")
+    xcall console("")
+    
+    ;;-------------------------------------------------------------------------
+    ;; Summary
+    
+    xcall console("=========================================================")
+    xcall console("Demonstration Complete!")
+    xcall console("=========================================================")
+    xcall console("")
+    xcall console("Key Points Demonstrated:")
+    xcall console("  1. Multiple I/O hooks can be registered for the same")
+    xcall console("     channel and work concurrently")
+    xcall console("  2. All hooks inherit from a common base class")
+    xcall console("  3. Each hook provides specialized functionality:")
+    xcall console("     - Logging")
+    xcall console("     - Validation")
+    xcall console("     - Statistics")
+    xcall console("  4. Hooks can be combined into a single class")
+    xcall console("  5. Hooks can be enabled/disabled individually")
+    xcall console("")
+    xcall console("Check the following files for detailed logs:")
+    xcall console("  - logging.txt (LoggingIOHook output)")
+    xcall console("  - combined.txt (CombinedIOHook output)")
+    xcall console("")
+    
+end
+
+endmain
